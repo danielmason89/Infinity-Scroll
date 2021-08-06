@@ -19,6 +19,8 @@
     "stylelint-vscode": "^7.0.0-6"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.15.4",
+    "jshint": "^2.13.0",
     "node": "^15.8.0",
     "yargs-parser": ">=13.1.2"
   }
