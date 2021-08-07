@@ -23,7 +23,7 @@ function newQuote() {
   const quote = apiQuotes[Math.floor(Math.random() * apiQuotes.length)];
   // Check if Author field is blacnk and replace with unknown
   if (!quote.author) {
-    authorText.textContent = "Unknown";
+    authorText.textContent = "Phuong Nguyen";
   } else {
     authorText.textContent = quote.author;
   }
