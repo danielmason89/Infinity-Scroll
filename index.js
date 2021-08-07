@@ -6,20 +6,18 @@ const newQuoteBtn = document.getElementById("new-quote");
 const loader = document.getElementById("loader");
 let apiQuotes = [];
 
-// Show Loading
-function loading() {
+function showLoadingSpinner() {
   loader.hidden = false;
   quoteContainer.hidden = true;
 }
-// Hide Loading
-function completed() {
+function removeLoadingSpinner() {
   quoteContainer.hidden = false;
   loader.hidden = true;
 }
 
 // Show new Quote
 function newQuote() {
-  loading();
+  showLoadingSpinner();
   const quote = apiQuotes[Math.floor(Math.random() * apiQuotes.length)];
   // Check if Author field is blacnk and replace with unknown
   if (!quote.author) {
@@ -35,19 +33,19 @@ function newQuote() {
   }
   // Set the quote, Hide the loader\
   quoteText.textContent = quote.text;
-  completed();
+  removeLoadingSpinner();
 }
 
 // Get Quotes from Api
 async function getQuotes() {
-  loading();
+  showLoadingSpinner();
   const apiURL = "https://type.fit/api/quotes";
   try {
     const response = await fetch(apiURL);
     apiQuotes = await response.json();
     newQuote();
   } catch (error) {
-    // Catch Error Here
+    getQuotes();
   }
 }
 
