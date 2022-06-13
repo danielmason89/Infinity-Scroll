@@ -15,10 +15,11 @@ function removeLoadingSpinner() {
   loader.hidden = true;
 }
 
+// Show new Quote
 function newQuote() {
   showLoadingSpinner();
   const quote = apiQuotes[Math.floor(Math.random() * apiQuotes.length)];
-  // Check if Author field is black and replace with unknown
+  // Check if Author field is blank and replace with unknown
   if (!quote.author) {
     authorText.textContent = "Phuong Nguyen";
   } else {
@@ -47,6 +48,7 @@ async function getQuotes() {
   }
 }
 
+// Tweet Quote
 function tweetQuote() {
   const twitterUrl = `https://twitter.com/intent/tweet?text=${quoteText.textContent} - ${authorText.textContent}`;
   window.open(twitterUrl, "_blank");
@@ -55,4 +57,5 @@ function tweetQuote() {
 newQuoteBtn.addEventListener("click", newQuote);
 twitterBtn.addEventListener("click", tweetQuote);
 
+// on Load, get the quotes
 getQuotes();
