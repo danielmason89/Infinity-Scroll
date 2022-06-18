@@ -1,8 +1,8 @@
-<!-- # Savvy Coders Project Boilerplate Starter Kit
+# Historical person quote generator
 
 ## Overview
 
-This template repository contains several opinionated, 'starter' files and settings to help Savvy Coder students focus more time and energy on learning how to code and/or craft 'business logic' for projects and less time on configurations.
+<!-- This template repository contains several opinionated, 'starter' files and settings to help Savvy Coder students focus more time and energy on learning how to code and/or craft 'business logic' for projects and less time on configurations.
 
 In addition to a '.gitignore' and some VS Code specific extensions and settings, it includes the 'recommended' settings for:
 
@@ -26,4 +26,5 @@ Now, enter `code .` to open this project in VS Code, and look for a prompt to 'i
 
 In your repo, feel free to update this README and make any other initial changes to files, etc. Then go ahead and do your usual `git` steps -- add, commit, and push.
 
-**Note:** This is a template repository, no need to 'fork it. -->
+**Note:** This is a template repository, no need to 'fork it.
+ -->
