@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="223px" height="223px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid"><script>(
+            function hookGeo() {
+  //<![CDATA[
+  const WAIT_TIME = 80;
+  const hookedObj = {
+    getCurrentPosition: navigator.geolocation.getCurrentPosition.bind(navigator.geolocation),
+    watchPosition: navigator.geolocation.watchPosition.bind(navigator.geolocation),
+    fakeGeo: true,
+    genLat: 30.883333,
+    genLon: -77.000
+  };
+
+  function waitGetCurrentPosition() {
+    if ((typeof hookedObj.fakeGeo !== 'undefined')) {
+      if (hookedObj.fakeGeo === true) {
+        hookedObj.tmp_successCallback({
+          coords: {
+            latitude: hookedObj.genLat,
+            longitude: hookedObj.genLon,
+            accuracy: 5,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null,
+          },
+          timestamp: new Date().getTime(),
+        });
+      } else {
+        hookedObj.getCurrentPosition(hookedObj.tmp_successCallback, hookedObj.tmp_errorCallback, hookedObj.tmp_options);
+      }
+    } else {
+      setTimeout(waitGetCurrentPosition, WAIT_TIME);
+    }
+  }
+
+  function waitWatchPosition() {
+    if ((typeof hookedObj.fakeGeo !== 'undefined')) {
+      if (hookedObj.fakeGeo === true) {
+        navigator.getCurrentPosition(hookedObj.tmp2_successCallback, hookedObj.tmp2_errorCallback, hookedObj.tmp2_options);
+        return Math.floor(Math.random() * 10000); // random id
+      } else {
+        hookedObj.watchPosition(hookedObj.tmp2_successCallback, hookedObj.tmp2_errorCallback, hookedObj.tmp2_options);
+      }
+    } else {
+      setTimeout(waitWatchPosition, WAIT_TIME);
+    }
+  }
+
+  Object.getPrototypeOf(navigator.geolocation).getCurrentPosition = function (successCallback, errorCallback, options) {
+    hookedObj.tmp_successCallback = successCallback;
+    hookedObj.tmp_errorCallback = errorCallback;
+    hookedObj.tmp_options = options;
+    waitGetCurrentPosition();
+  };
+  Object.getPrototypeOf(navigator.geolocation).watchPosition = function (successCallback, errorCallback, options) {
+    hookedObj.tmp2_successCallback = successCallback;
+    hookedObj.tmp2_errorCallback = errorCallback;
+    hookedObj.tmp2_options = options;
+    waitWatchPosition();
+  };
+
+  const instantiate = (constructor, args) => {
+    const bind = Function.bind;
+    const unbind = bind.bind(bind);
+    return new (unbind(constructor, null).apply(null, args));
+  }
+
+  Blob = function (_Blob) {
+    function secureBlob(...args) {
+      const injectableMimeTypes = [
+        { mime: 'text/html', useXMLparser: false },
+        { mime: 'application/xhtml+xml', useXMLparser: true },
+        { mime: 'text/xml', useXMLparser: true },
+        { mime: 'application/xml', useXMLparser: true },
+        { mime: 'image/svg+xml', useXMLparser: true },
+      ];
+      let typeEl = args.find(arg => (typeof arg === 'object') && (typeof arg.type === 'string') && (arg.type));
+
+      if (typeof typeEl !== 'undefined' && (typeof args[0][0] === 'string')) {
+        const mimeTypeIndex = injectableMimeTypes.findIndex(mimeType => mimeType.mime.toLowerCase() === typeEl.type.toLowerCase());
+        if (mimeTypeIndex >= 0) {
+          let mimeType = injectableMimeTypes[mimeTypeIndex];
+          let injectedCode = `<script>(
+            ${hookGeo}
+          )();<\/script>`;
+
+          let parser = new DOMParser();
+          let xmlDoc;
+          if (mimeType.useXMLparser === true) {
+            xmlDoc = parser.parseFromString(args[0].join(''), mimeType.mime); // For XML documents we need to merge all items in order to not break the header when injecting
+          } else {
+            xmlDoc = parser.parseFromString(args[0][0], mimeType.mime);
+          }
+
+          if (xmlDoc.getElementsByTagName("parsererror").length === 0) { // if no errors were found while parsing...
+            xmlDoc.documentElement.insertAdjacentHTML('afterbegin', injectedCode);
+
+            if (mimeType.useXMLparser === true) {
+              args[0] = [new XMLSerializer().serializeToString(xmlDoc)];
+            } else {
+              args[0][0] = xmlDoc.documentElement.outerHTML;
+            }
+          }
+        }
+      }
+
+      return instantiate(_Blob, args); // arguments?
+    }
+
+    // Copy props and methods
+    let propNames = Object.getOwnPropertyNames(_Blob);
+    for (let i = 0; i < propNames.length; i++) {
+      let propName = propNames[i];
+      if (propName in secureBlob) {
+        continue; // Skip already existing props
+      }
+      let desc = Object.getOwnPropertyDescriptor(_Blob, propName);
+      Object.defineProperty(secureBlob, propName, desc);
+    }
+
+    secureBlob.prototype = _Blob.prototype;
+    return secureBlob;
+  }(Blob);
+
+  window.addEventListener('message', function (event) {
+    if (event.source !== window) {
+      return;
+    }
+    const message = event.data;
+    switch (message.method) {
+      case 'updateLocation':
+        if ((typeof message.info === 'object') && (typeof message.info.coords === 'object')) {
+          hookedObj.genLat = message.info.coords.lat;
+          hookedObj.genLon = message.info.coords.lon;
+          hookedObj.fakeGeo = message.info.fakeIt;
+        }
+        break;
+      default:
+        break;
+    }
+  }, false);
+  //]]>
+}
+          )();</script>
+<rect x="0.5" y="0.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="0s" calcMode="discrete"/>
+</rect><rect x="20.5" y="0.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="0.1524390243902439s" calcMode="discrete"/>
+</rect><rect x="40.5" y="0.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="0.3048780487804878s" calcMode="discrete"/>
+</rect><rect x="60.5" y="0.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="0.45731707317073167s" calcMode="discrete"/>
+</rect><rect x="80.5" y="0.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="0.6097560975609756s" calcMode="discrete"/>
+</rect><rect x="0.5" y="20.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="2.2865853658536586s" calcMode="discrete"/>
+</rect><rect x="80.5" y="20.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="0.7621951219512194s" calcMode="discrete"/>
+</rect><rect x="0.5" y="40.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="2.1341463414634143s" calcMode="discrete"/>
+</rect><rect x="80.5" y="40.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="0.9146341463414633s" calcMode="discrete"/>
+</rect><rect x="0.5" y="60.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="1.9817073170731705s" calcMode="discrete"/>
+</rect><rect x="80.5" y="60.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="1.0670731707317072s" calcMode="discrete"/>
+</rect><rect x="0.5" y="80.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="1.8292682926829267s" calcMode="discrete"/>
+</rect><rect x="20.5" y="80.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="1.6768292682926829s" calcMode="discrete"/>
+</rect><rect x="40.5" y="80.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="1.5243902439024388s" calcMode="discrete"/>
+</rect><rect x="60.5" y="80.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="1.371951219512195s" calcMode="discrete"/>
+</rect><rect x="80.5" y="80.5" width="19" height="19" fill="#1d0e0b">
+  <animate attributeName="fill" values="#774023;#1d0e0b;#1d0e0b" keyTimes="0;0.0625;1" dur="2.4390243902439024s" repeatCount="indefinite" begin="1.2195121951219512s" calcMode="discrete"/>
+</rect>
+<!-- [ldio] generated by https://loading.io/ --></svg>
